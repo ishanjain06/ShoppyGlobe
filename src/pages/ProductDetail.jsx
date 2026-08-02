@@ -1,0 +1,7 @@
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { addToCart } from '../store/cartSlice'
+import Loader from '../components/Loader'
+function ProductDetail() { const { id } = useParams(); const dispatch = useDispatch(); const [product, setProduct] = useState(null); const [error, setError] = useState(''); useEffect(() => { const controller = new AbortController(); async function getProduct() { try { const response = await fetch(`https://dummyjson.com/products/${id}`, { signal: controller.signal }); if (!response.ok) throw new Error('Product details could not be loaded.'); setProduct(await response.json()) } catch (err) { if (err.name !== 'AbortError') setError(err.message) } } getProduct(); return () => controller.abort() }, [id]); if (error) return <p className="status-message error">{error}</p>; if (!product) return <Loader />; return <section className="detail-card"><img src={product.thumbnail} alt={product.title} /><div><Link to="/" className="back-link">← Back to products</Link><p className="category">{product.category}</p><h1>{product.title}</h1><p className="rating">★ {product.rating} / 5</p><p className="detail-price">${product.price.toFixed(2)}</p><p className="description">{product.description}</p><button onClick={() => dispatch(addToCart(product))}>Add to Cart</button></div></section> }
+export default ProductDetail
